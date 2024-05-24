@@ -1,0 +1,1 @@
+[{"nombre_producto": "Laptop", "precio": 1200.99, "correo": "ventas@tienda.com", "id": 1}, {"nombre_producto": "Smartphone", "precio": 699.99, "correo": "ventas@electronica.com", "id": 2}, {"nombre_producto": "Auriculares", "precio": 149.99, "correo": "info@accesorios.com", "id": 3}, {"nombre_producto": "Monitor", "precio": 299.99, "correo": "contacto@pantallas.com", "id": 4}]

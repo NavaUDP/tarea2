@@ -1,21 +1,25 @@
-import sys
 import subprocess
+import json
 import os
 
-#para no tener archivos .txt de más durante las pruebas, se borra el archivo de datos antes de crear otro
-if os.path.exists('/home/nava/Documentos/Universidad/Distribuidos/tarea2/data/datos.txt'):
-    os.remove('/home/nava/Documentos/Universidad/Distribuidos/tarea2/data/datos.txt')
+#obtener el producto
+with open('data/datos.json', 'r') as file:
+    data = json.load(file)
 
-#ingresar una solicitud 
-nombre_producto = input("Ingrese el nombre del producto: ")
-precio = float(input("Ingrese el precio del producto: "))
-correo = input("Ingrese su correo: ")
+# si ya existe el archivo datos_con_ids.json existe, se ejecuta el producer y se termina el script
+if os.path.exists('data/datos_con_ids.json'):
+    print("El archivo datos_con_ids.json ya existe.")
+    subprocess.run(["python3", "API/producer.py"])
+    exit()
+else:
+    productos = data['productos']
+    for i, producto in enumerate(productos):
+        producto['id'] = i + 1
 
-# Guardar los datos en un archivo
-with open('/home/nava/Documentos/Universidad/Distribuidos/tarea2/data/datos.txt', 'w') as file:
-    file.write(f"Nombre del producto: {nombre_producto}\n")
-    file.write(f"Precio del producto: {precio}\n")
-    file.write(f"Correo: {correo}\n")
+    # Escribir los productos con sus identificadores en un nuevo archivo JSON
+    with open('data/datos_con_ids.json', 'w') as file:
+        json.dump(productos, file)
+    print("Productos guardados con id.")
 
-#ejecutar producer.py
-subprocess.run(["python3", "API/producer.py"])
+    #ejecutar producer.py
+    subprocess.run(["python3", "API/producer.py"])

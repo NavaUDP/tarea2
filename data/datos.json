@@ -1,0 +1,24 @@
+{
+    "productos": [
+        {
+            "nombre_producto": "Laptop",
+            "precio": 1200.99,
+            "correo": "ventas@tienda.com"
+        },
+        {
+            "nombre_producto": "Smartphone",
+            "precio": 699.99,
+            "correo": "ventas@electronica.com"
+        },
+        {
+            "nombre_producto": "Auriculares",
+            "precio": 149.99,
+            "correo": "info@accesorios.com"
+        },
+        {
+            "nombre_producto": "Monitor",
+            "precio": 299.99,
+            "correo": "contacto@pantallas.com"
+        }
+    ]
+}

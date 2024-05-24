@@ -1,4 +1,5 @@
 from confluent_kafka import Producer
+import json
 import sys
 
 # Configuración del productor
@@ -14,10 +15,15 @@ def delivery_report(err, msg):
     else:
         print(f'Mensaje entregado a {msg.topic()} [{msg.partition()}]')
 
-with open('/home/nava/Documentos/Universidad/Distribuidos/tarea2/data/datos.txt', 'r') as file:
-    data = file.read()
+with open('/home/nava/Documentos/Universidad/Distribuidos/tarea2/data/datos_con_ids.json', 'r') as file:
+    data = json.load(file)
 
-#enviar los datos al topic test
-producer.produce('test', key='key', value=data, callback=delivery_report)
+for item in data:
+    # Convertir el producto a una cadena JSON
+    item_str = json.dumps(item)
 
-producer.flush()
+    # Enviar el producto al topic
+    producer.produce('test', key='key', value=item_str, callback=delivery_report)
+
+    # Asegurar que el mensaje se envíe antes de continuar con el siguiente
+    producer.flush()

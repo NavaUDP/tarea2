@@ -1,4 +1,5 @@
 from confluent_kafka import Consumer, KafkaException
+import json
 
 # Configuración del consumidor
 conf = {
@@ -23,8 +24,26 @@ try:
         if msg.error():
             raise KafkaException(msg.error())
         else:
+            # Decodificar mensaje y cargarlo como un diccionario
+            msg_dict = json.loads(msg.value().decode("utf-8"))
+
+            # Verificar y cambiar el estado
+            if 'estado' not in msg_dict:
+                msg_dict['estado'] = 'recibido'
+            elif msg_dict['estado'] == 'recibido':
+                msg_dict['estado'] = 'preparando'
+            elif msg_dict['estado'] == 'preparando':
+                msg_dict['estado'] = 'entregando'
+            elif msg_dict['estado'] == 'entregando':
+                msg_dict['estado'] = 'finalizado'
+
+            # Guardar el diccionario actualizado en el archivo 'data_con_parametros.json'
+            with open('/home/nava/Documentos/Universidad/Distribuidos/tarea2/data/datos_con_estado.json', 'a') as file:
+                json.dump(msg_dict, file)
+                file.write('\n')
+
             # Imprimir mensaje
-            print(f'Mensaje recibido: {msg.value().decode("utf-8")}')
+            print(f'Mensaje recibido: {json.dumps(msg_dict)}')
 except KeyboardInterrupt:
     pass
 finally:
