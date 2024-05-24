@@ -1,0 +1,23 @@
+{
+  "name": "tarea2",
+  "version": "1.0.0",
+  "description": "Tarea 2 de Sistemas Distribuidos 1-2024",
+  "main": "producer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NavaUDP/tarea2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NavaUDP/tarea2/issues"
+  },
+  "homepage": "https://github.com/NavaUDP/tarea2#readme",
+  "dependencies": {
+    "kafka-node": "^5.0.0"
+  }
+}
