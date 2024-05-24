@@ -1,0 +1,3 @@
+Nombre del producto: cartera
+Precio del producto: 10000.0
+Correo: correo@test.com
