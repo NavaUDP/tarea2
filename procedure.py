@@ -38,7 +38,7 @@ try:
                 msg_dict['estado'] = 'finalizado'
 
             # Guardar el diccionario actualizado en el archivo 'data_con_parametros.json'
-            with open('/home/nava/Documentos/Universidad/Distribuidos/tarea2/data/datos_con_estado.json', 'a') as file:
+            with open('data/datos_con_estado.json', 'a') as file:
                 json.dump(msg_dict, file)
                 file.write('\n')
 
