@@ -2,7 +2,7 @@ from confluent_kafka import Consumer, Producer, KafkaException
 import json
 
 #Configuraciones Consumer y Producer
-conf_consumer = {'bootstrap.servers': 'localhost', 'group.id': 'mygroup', 'auto.offset.reset': 'earliest'}
+conf_consumer = {'bootstrap.servers': 'localhost:9092', 'group.id': 'procedure_group', 'auto.offset.reset': 'earliest'}
 conf_producer = {'bootstrap.servers': 'localhost:9092'}
 
 #crear al consumer y producer

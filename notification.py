@@ -1,29 +1,36 @@
-from confluent_kafka import Producer
+from confluent_kafka import Consumer, KafkaException
 import json
 import sys
 
-# Configuración del productor
-conf = {'bootstrap.servers': 'localhost:9092'}
+# Configuración del consumer
+conf = {'bootstrap.servers': 'localhost:9092', 'group.id': 'notification_group', 'auto.offset.reset': 'earliest'}
 
-# Crear el productor con la configuración dada
-producer = Producer(conf)
+# Crear el consumer con la configuración dada
+consumer = Consumer(conf)
 
-# Función de callback para saber si un mensaje fue entregado o no
-def delivery_report(err, msg):
-    if err is not None:
-        print(f'Mensaje falló la entrega: {err}')
-    else:
-        print(f'Mensaje entregado a {msg.topic()} [{msg.partition()}]')
+#Entrar al topic
+consumer.subscribe(['test'])
+print("Entrando al topic test")
 
-with open('/home/nava/Documentos/Universidad/Distribuidos/tarea2/data/datos_con_ids.json', 'r') as file:
-    data = json.load(file)
+try:
+    while True:
+        #lee el mensaje
+        msg = consumer.poll(1.0)
+        if msg is None:
+            continue
+        if msg.error():
+            raise KafkaException(msg.error())
+        else:
+            #Decodifica el mensaje
+            msg_dict = json.loads(msg.value().decode('utf-8'))
 
-for item in data:
-    # Convertir el producto a una cadena JSON
-    item_str = json.dumps(item)
+            #Si el estado es cualquiera excepto 'finalizado', se ignora el mensaje
+            if 'estado' not in msg_dict or msg_dict['estado'] != 'finalizado':
+                continue
 
-    # Enviar el producto al topic
-    producer.produce('test', key='key', value=item_str, callback=delivery_report)
+            print(f"Mensaje recibido: {msg_dict}")
 
-    # Asegurar que el mensaje se envíe antes de continuar con el siguiente
-    producer.flush()
+except KeyboardInterrupt:
+    pass
+finally:
+    consumer.close()
