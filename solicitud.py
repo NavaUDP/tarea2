@@ -1,11 +1,10 @@
 from confluent_kafka import Producer
 import json
 import os
+import uuid
 
-#Configuracion producer
+# Configuración del producer
 conf = {'bootstrap.servers': 'localhost:9092'}
-
-#creamos al productor
 producer = Producer(conf)
 
 # Función de callback para saber si un mensaje fue entregado o no
@@ -15,34 +14,26 @@ def delivery_report(err, msg):
     else:
         print(f'Mensaje entregado a {msg.topic()} [{msg.partition()}]')
 
-fin = 0
-while fin == 0:
-    #Funcion para saber si se agregaron las id a los productos
-    if os.path.isfile('data/datos_con_ids.json'):
-        #en caso de existir el archivo entonces se envía el mensaje a kafka
-        with open('data/datos_con_ids.json', 'r') as file:
-            data = json.load(file)
-    
-        for item in data:
-            #Convertir el producto a una cadena JSON
-            item_str = json.dumps(item)
+# Función para verificar y asignar una id a los productos
+def verify_and_assign_id(envio):
+    if 'id' not in envio:
+        envio['id'] = str(uuid.uuid4())
+    return envio
 
-            #Enviar el producto al topic
-            producer.produce('test', key = 'key', value=item_str, callback=delivery_report)
+# Abrir el archivo deliverytime.json
+with open('data/deliverytime.json', 'r') as file:
+    envios = json.load(file)
 
-            producer.flush()
-        print("Productos enviados a Kafka.")
-        fin = 1
-    else:
-        with open('data/datos.json', 'r') as file:
-            data = json.load(file)
+# Iterar sobre cada envío y enviarlo al topic de Kafka
+for envio in envios:
+    # Verificar y asignar una id si no tiene
+    envio_con_id = verify_and_assign_id(envio)
 
-        productos = data['productos']
-        for i, producto in enumerate(productos):
-            producto['id'] = i + 1
+    # Convertir el envío a bytes
+    envio_bytes = json.dumps(envio_con_id).encode('utf-8')
 
-            # Escribir los productos con sus identificadores en un nuevo archivo JSON
-            with open('data/datos_con_ids.json', 'w') as file:
-                json.dump(productos, file)
-    
-        print("Productos guardados con id.")
+    # Enviar el mensaje al topic 'envios'
+    producer.produce('envios', value=envio_bytes, callback=delivery_report)
+
+# Esperar a que todos los mensajes sean enviados
+producer.flush()

@@ -23,5 +23,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "test:1:1:retention.ms=120000"  # Crea el topic 'test' con un tiempo de retención de 2 minutos
     ports:
       - "9092:9092"
