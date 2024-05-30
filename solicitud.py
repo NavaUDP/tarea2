@@ -33,7 +33,7 @@ for envio in envios:
     envio_bytes = json.dumps(envio_con_id).encode('utf-8')
 
     # Enviar el mensaje al topic 'envios'
-    producer.produce('envios', value=envio_bytes, callback=delivery_report)
+    producer.produce('test', value=envio_bytes, callback=delivery_report)
 
 # Esperar a que todos los mensajes sean enviados
 producer.flush()
