@@ -3,7 +3,7 @@ import json
 import sys
 
 # Configuración del consumer
-conf = {'bootstrap.servers': 'localhost:9092', 'group.id': 'notification_group', 'auto.offset.reset': 'earliest'}
+conf = {'bootstrap.servers': 'localhost:9092, localhost:9093, localhost:9094', 'group.id': 'notification_group', 'auto.offset.reset': 'earliest'}
 
 # Crear el consumer con la configuración dada
 consumer = Consumer(conf)
