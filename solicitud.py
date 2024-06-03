@@ -5,7 +5,7 @@ import uuid
 import subprocess
 
 # Configuración del producer
-conf = {'bootstrap.servers': 'localhost:9092, localhost:9093, localhost:9094'}
+conf = {'bootstrap.servers': 'localhost:9092'}
 producer = Producer(conf)
 
 # Función de callback para saber si un mensaje fue entregado o no
@@ -58,7 +58,8 @@ def solicitar_pedido():
     # Esperar a que el mensaje sea enviado
     producer.flush()
     
-    return jsonify({"mensaje": f"Pedido de {delivery_id} recibido y enviado a Kafka", "pedido": envio_con_id})
+    # Devolver una respuesta
+    return jsonify({"mensaje": f"Pedido de {delivery_id} recibido y enviado a Kafka", "pedido": envio_con_id}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
