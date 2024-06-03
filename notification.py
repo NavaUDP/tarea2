@@ -1,6 +1,7 @@
+import logging
 from confluent_kafka import Consumer, KafkaException
 import json
-import sys
+import os
 from flask import Flask, jsonify
 import smtplib
 from email.mime.text import MIMEText
@@ -29,11 +30,33 @@ def get_status(order_id):
     else:
         return jsonify({"error": "Pedido no encontrado"}), 404
 
-# Configuración de SMTP para Outlook.es
-smtp_server = "smtp-mail.outlook.com"  # El mismo servidor que outlook.com
-smtp_port = 587
-smtp_username = "diegopro2.0@outlook.es" 
-smtp_password = "Chipotle2024" 
+ #Configuracion para realizar la peticion smtp
+
+
+HOST = "smtp-mail.outlook.com"
+PORT = 587
+smtp_username = os.environ.get('API envíos', 'dnavarretev26@gmail.com')
+smtp_password = os.environ.get('API envíos', 'fcpd tevo mbmf ilrj') 
+
+
+def process_message(msg_dict):
+    order_id = msg_dict['id-envio']
+    if order_id is None:
+        logging.error(f"No se encontró el ID en el mensaje: {msg_dict}")
+        return
+        
+    last_status[order_id] = msg_dict
+
+    # Verificar si el mensaje tiene un correo electrónico
+    if 'correo' in msg_dict:
+        to_email = msg_dict['correo']
+        subject = f"Actualización de tu pedido {order_id}"
+        body = create_email_body(msg_dict)
+        send_email(to_email, subject, body)
+    else:
+        logging.warning(f"No se encontró campo 'correo' en el mensaje: {msg_dict}")
+
+    print(f"Mensaje recibido y procesado: {msg_dict}")
 
 def send_email(to_email, subject, body):
     msg = MIMEMultipart()
@@ -43,40 +66,35 @@ def send_email(to_email, subject, body):
     msg.attach(MIMEText(body, 'plain'))
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
+        with smtplib.SMTP(HOST, PORT) as server:
             server.starttls()
             server.login(smtp_username, smtp_password)
             server.send_message(msg)
-            print(f"Correo enviado a {to_email}")
+            logging.info(f"Correo enviado a {to_email}")
     except smtplib.SMTPAuthenticationError:
-        print("Error de autenticación. Verifica tu correo y contraseña.")
+        logging.error("Error de autenticación SMTP. Verifica tus credenciales.")
     except smtplib.SMTPException as e:
-        print(f"Error SMTP: {e}")
+        logging.error(f"Error SMTP: {e}")
     except Exception as e:
-        print(f"Error inesperado al enviar el correo: {e}")
+        logging.error(f"Error inesperado al enviar el correo a {to_email}: {e}")
 
-def process_message(msg_dict):
-    order_id = msg_dict['id']
-    last_status[order_id] = msg_dict
+def create_email_body(msg_dict):
+    order_id = msg_dict.get('id-envio')
+    estado = msg_dict.get('estado', 'En proceso')
 
-    if 'correo' in msg_dict:
-        subject = f"Actualización de tu pedido {order_id}"
-        body = f"""
-        ¡Hola! Gracias por usar nuestro servicio de delivery.
+    return f"""
+    ¡Hola! Gracias por usar nuestro servicio de delivery.
 
-        Tu pedido {msg_dict['nombre']} (ID: {order_id}) ha sido actualizado.
+    (ID: {order_id}) ha sido actualizado.
 
-        - Estado actual: {msg_dict['estado']}
-        - Precio: {msg_dict.get('precio', 'No disponible')} €
+    - Estado actual: {estado}
 
-        Te mantendremos informado sobre cualquier cambio en tu pedido.
-        ¡Que tengas un buen día!
 
-        El equipo de Delivery UDM
-        """
-        send_email(msg_dict['correo'], subject, body)
+    Te mantendremos informado sobre cualquier cambio en tu pedido.
+    ¡Que tengas un buen día!
 
-    print(f"Mensaje recibido y procesado: {msg_dict}")
+    El equipo de Delivery UDM
+    """
 
 try:
     # Iniciar Flask en un hilo separado
